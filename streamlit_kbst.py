@@ -17,27 +17,27 @@ input_data_df = pd.DataFrame(columns=['IPA', 'IPS', 'MTK', 'GEO', 'EKO', 'SOS'])
 # Input untuk setiap mata pelajaran
 with col1:
     ipa_input = st.text_input('Nilai IPA', value='0')
-    input_data_df.loc[0, 'IPA'] = ipa_input
+    input_data_df.loc[len(input_data_df), 'IPA'] = ipa_input
 
 with col2:
     ips_input = st.text_input('Nilai IPS', value='0')
-    input_data_df.loc[0, 'IPS'] = ips_input
+    input_data_df.loc[len(input_data_df)-1, 'IPS'] = ips_input
 
 with col3:
     mtk_input = st.text_input('Nilai MTK', value='0')
-    input_data_df.loc[0, 'MTK'] = mtk_input
+    input_data_df.loc[len(input_data_df)-1, 'MTK'] = mtk_input
 
 with col4:
     geo_input = st.text_input('Nilai GEO', value='0')
-    input_data_df.loc[0, 'GEO'] = geo_input
+    input_data_df.loc[len(input_data_df)-1, 'GEO'] = geo_input
 
 with col5:
     eko_input = st.text_input('Nilai EKO', value='0')
-    input_data_df.loc[0, 'EKO'] = eko_input
+    input_data_df.loc[len(input_data_df)-1, 'EKO'] = eko_input
 
 with col6:
     sos_input = st.text_input('Nilai SOS', value='0')
-    input_data_df.loc[0, 'SOS'] = sos_input
+    input_data_df.loc[len(input_data_df)-1, 'SOS'] = sos_input
 
 # Tombol "Tambah Data" untuk menambah index
 if st.button('Tambah Data'):
