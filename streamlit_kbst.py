@@ -60,6 +60,9 @@ with col3:
 # Variabel untuk hasil prediksi
 kbst_diagnosis = ''
 
+# Variabel untuk hasil prediksi
+kbst_diagnosis = ''
+
 # Tombol untuk prediksi
 if st.button('Lakukan Prediksi'):
     # Menggunakan model untuk melakukan prediksi
