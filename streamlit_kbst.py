@@ -14,9 +14,11 @@ with st.form(key='my_form'):
 
     submit_button = st.form_submit_button(label='Submit')
 
-# Menampilkan hasil input
+# Menambahkan baris baru ke DataFrame setiap kali tombol "Submit" diklik
 if submit_button:
+    new_index = len(df) + 1
     new_row = {'Nama': nama_input, 'Usia': int(usia_input)}
     df = df.append(new_row, ignore_index=True)
 
+# Menampilkan DataFrame
 st.write(df)
