@@ -1,56 +1,102 @@
-import pickle
 import streamlit as st
+import pandas as pd
+import pickle
 
-# membaca model
+# Membaca model
 kbst_model = pickle.load(open('kbst_model.sav', 'rb'))
 
-# judul web
+# Judul web
 st.title('SISTEM PREDIKSI KELUARGA BERESIKO STUNTING')
 
-# membuat kolom dengan 2 bagian
-col1, col2 = st.columns(2)
+# Membuat kolom dengan 3 bagian
+col1, col2, col3 = st.columns(3)
+
+# Nilai default untuk setiap input
+default_values = {
+    'sumber_air_minum_buruk': '0',
+    'sanitasi_buruk': '0',
+    'terlalu_muda_istri': '0',
+    'terlalu_tua_istri': '0',
+    'terlalu_dekat_umur': '0',
+    'terlalu_banyak_anak': '0'
+}
+
+# Mengecek dan menginisialisasi state jika belum ada
+if 'reset_flag' not in st.session_state:
+    st.session_state.reset_flag = False
+
+if 'state' not in st.session_state:
+    st.session_state.state = {
+        'sumber_air_minum_buruk': default_values['sumber_air_minum_buruk'],
+        'sanitasi_buruk': default_values['sanitasi_buruk'],
+        'terlalu_muda_istri': default_values['terlalu_muda_istri'],
+        'terlalu_tua_istri': default_values['terlalu_tua_istri'],
+        'terlalu_dekat_umur': default_values['terlalu_dekat_umur'],
+        'terlalu_banyak_anak': default_values['terlalu_banyak_anak']
+    }
+
+# Inisialisasi dataframe kosong
+input_result_df = pd.DataFrame()
 
 # Input untuk pertanyaan-pertanyaan
 with col1:
-    sumber_air_minum_buruk = st.text_input('Apakah Sumber Air Minum Buruk?')
+    st.session_state.state['sumber_air_minum_buruk'] = st.text_input('Apakah Sumber Air Minum Buruk? (1=Ya, 0=Tidak)', st.session_state.state['sumber_air_minum_buruk'])
 
 with col2:
-    sanitasi_buruk = st.text_input('Apakah Sanitasi Buruk?')
+    st.session_state.state['terlalu_muda_istri'] = st.text_input('Apakah Umur Istri Terlalu Muda? (1=Ya, 0=Tidak)', st.session_state.state['terlalu_muda_istri'])
+
+with col3:
+    st.session_state.state['terlalu_dekat_umur'] = st.text_input('Apakah Umur Suami & Istri Terlalu Dekat? (1=Ya, 0=Tidak)', st.session_state.state['terlalu_dekat_umur'])
 
 with col1:
-    terlalu_muda_istri = st.text_input('Apakah Istri Terlalu Muda?')
+    st.session_state.state['sanitasi_buruk'] = st.text_input('Apakah Sanitasi Buruk? (1=Ya, 0=Tidak)', st.session_state.state['sanitasi_buruk'])
 
 with col2:
-    terlalu_tua_istri = st.text_input('Apakah Istri Terlalu Tua?')
+    st.session_state.state['terlalu_tua_istri'] = st.text_input('Apakah Istri Terlalu Tua? (1=Ya, 0=Tidak)', st.session_state.state['terlalu_tua_istri'])
 
-with col1:
-    terlalu_dekat_umur = st.text_input('Apakah Umur Suami & Istri Terlalu Dekat?')
+with col3:
+    st.session_state.state['terlalu_banyak_anak'] = st.text_input('Apakah Memiliki Banyak Anak? (1=Ya, 0=Tidak)', st.session_state.state['terlalu_banyak_anak'])
 
-with col2:
-    terlalu_banyak_anak = st.text_input('Apakah Memiliki Banyak Anak?')
-
-# variabel untuk hasil prediksi
+# Variabel untuk hasil prediksi
 kbst_diagnosis = ''
 
-# membuat tombol untuk prediksi
-if st.button('Test Prediksi Stunting'):
+# Tombol untuk prediksi
+if st.button('Lakukan Prediksi'):
     # Menggunakan model untuk melakukan prediksi
-    kbst_prediction = kbst_model.predict([[sumber_air_minum_buruk, sanitasi_buruk, terlalu_muda_istri, terlalu_tua_istri, terlalu_dekat_umur, terlalu_banyak_anak]])
+    input_data = {key: int(value) if value.isdigit() and int(value) in [0, 1] else None for key, value in st.session_state.state.items()}
 
-    # Menyusun diagnosa berdasarkan hasil prediksi
-    if kbst_prediction[0] == 1:
-        kbst_diagnosis = 'Keluarga Beresiko Stunting'
+    # Jika ada nilai yang tidak valid, beri tahu pengguna
+    if None in input_data.values():
+        st.error('Masukkan hanya angka 0 atau 1.')
+
     else:
-        kbst_diagnosis = 'Keluarga Tidak Beresiko Stunting'
+        # Membuat DataFrame dari input untuk memudahkan prediksi
+        input_df = pd.DataFrame([input_data])
 
-# tombol reset untuk mengembalikan nilai ke default
-if st.button('Reset Input'):
-    sumber_air_minum_buruk = default_values['sumber_air_minum_buruk']
-    sanitasi_buruk = default_values['sanitasi_buruk']
-    terlalu_muda_istri = default_values['terlalu_muda_istri']
-    terlalu_tua_istri = default_values['terlalu_tua_istri']
-    terlalu_dekat_umur = default_values['terlalu_dekat_umur']
-    terlalu_banyak_anak = default_values['terlalu_banyak_anak']
+        kbst_prediction = kbst_model.predict(input_df)
 
-# Menampilkan hasil diagnosa
-st.success(kbst_diagnosis)
+        # Menyusun diagnosa berdasarkan hasil prediksi
+        if kbst_prediction[0] == 1:
+            kbst_diagnosis = '1'
+        else:
+            kbst_diagnosis = '0'
+
+        # Menambahkan hasil prediksi ke dataframe
+        input_df['Hasil Prediksi'] = kbst_diagnosis
+        input_result_df = input_result_df.append(input_df, ignore_index=True)
+
+        # Menetapkan nilai default kembali
+        st.session_state.state = default_values.copy()
+
+        # Mengatur flag reset menjadi False setelah prediksi
+        st.session_state.reset_flag = False
+
+# Menampilkan hasil prediksi
+st.success(f'Hasil Prediksi: {kbst_diagnosis}')
+
+# Tombol untuk mengunduh dataframe
+if not input_result_df.empty:
+    st.write('Dataframe Hasil Prediksi:')
+    st.write(input_result_df)
+    csv = input_result_df.to_csv(index=False)
+    st.download_button('Unduh Dataframe Hasil Prediksi', csv, 'predicted_results.csv')
