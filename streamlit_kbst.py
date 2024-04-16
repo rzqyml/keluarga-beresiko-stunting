@@ -50,10 +50,7 @@ if st.button('Lakukan Prediksi'):
             kbst_prediction = kbst_model.predict(input_df)
 
             # Menyusun diagnosa berdasarkan hasil prediksi
-            if kbst_prediction[0] == 1:
-                kbst_diagnosis = '1'
-            else:
-                kbst_diagnosis = '0'
+            kbst_diagnosis = '1' if kbst_prediction[0] == 1 else '0'
 
             # Menambahkan hasil prediksi ke dataframe
             input_df['Hasil Prediksi'] = kbst_diagnosis
