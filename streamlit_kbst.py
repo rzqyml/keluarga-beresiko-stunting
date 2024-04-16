@@ -20,5 +20,9 @@ if submit_button:
     new_row = {'Nama': nama_input, 'Usia': int(usia_input)}
     df = df.append(new_row, ignore_index=True)
 
+    # Mengosongkan kolom input setelah tombol "Submit" diklik
+    nama_input = ''
+    usia_input = ''
+
 # Menampilkan DataFrame
 st.write(df)
