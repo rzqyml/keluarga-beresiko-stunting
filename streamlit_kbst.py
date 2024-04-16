@@ -56,11 +56,11 @@ if st.button('Lakukan Prediksi'):
             input_df['Hasil Prediksi'] = kbst_diagnosis
             input_result_df = input_result_df.append(input_df, ignore_index=True)
 
-   """# Menetapkan nilai default kembali
+   # Menetapkan nilai default kembali
     st.session_state.state = default_values.copy()
 
     # Mengatur flag reset menjadi False setelah prediksi
-    st.session_state.reset_flag = False"""
+    st.session_state.reset_flag = False
 
 # Menampilkan hasil prediksi
 st.success(f'Hasil Prediksi: {kbst_diagnosis}')
