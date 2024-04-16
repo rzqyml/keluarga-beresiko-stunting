@@ -2,72 +2,57 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-# Membaca model
+# Load model
 kbst_model = pickle.load(open('kbst_model.sav', 'rb'))
 
 # Judul web
-st.title('SISTEM PREDIKSI KELUARGA BERESIKO STUNTING')
+st.title('Sistem Prediksi Rekomendasi Beasiswa')
+
+# Kolom isian
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 # Inisialisasi dataframe kosong
-input_result_df = pd.DataFrame()
+input_data_df = pd.DataFrame(columns=['IPA', 'IPS', 'MTK', 'GEO', 'EKO', 'SOS'])
 
-# Fungsi untuk menambahkan input form dinamis
-def add_dynamic_input(num_data):
-    data = {}
-    for i in range(num_data):
-        with st.form(key=f"form_{i}"):
-            st.write(f"Data {i+1}")
-            data[f"sumber_air_minum_buruk_{i}"] = st.text_input('Apakah Sumber Air Minum Buruk? (1=Ya, 0=Tidak)', '0')
-            data[f"terlalu_muda_istri_{i}"] = st.text_input('Apakah Umur Istri Terlalu Muda? (1=Ya, 0=Tidak)', '0')
-            data[f"terlalu_dekat_umur_{i}"] = st.text_input('Apakah Umur Suami & Istri Terlalu Dekat? (1=Ya, 0=Tidak)', '0')
-            data[f"sanitasi_buruk_{i}"] = st.text_input('Apakah Sanitasi Buruk? (1=Ya, 0=Tidak)', '0')
-            data[f"terlalu_tua_istri_{i}"] = st.text_input('Apakah Istri Terlalu Tua? (1=Ya, 0=Tidak)', '0')
-            data[f"terlalu_banyak_anak_{i}"] = st.text_input('Apakah Memiliki Banyak Anak? (1=Ya, 0=Tidak)', '0')
-            submit_button = st.form_submit_button(label='Tambah Data')
-    return data
+# Input untuk setiap mata pelajaran
+with col1:
+    ipa_input = st.text_input('Nilai IPA', value='0')
+    input_data_df.loc[0, 'IPA'] = ipa_input
 
-# Tombol untuk menambah data
-num_data = st.number_input("Jumlah data yang ingin diinput", min_value=1, step=1, value=1)
-data = add_dynamic_input(num_data)
+with col2:
+    ips_input = st.text_input('Nilai IPS', value='0')
+    input_data_df.loc[0, 'IPS'] = ips_input
 
-# Variabel untuk hasil prediksi
-kbst_diagnosis = ''
+with col3:
+    mtk_input = st.text_input('Nilai MTK', value='0')
+    input_data_df.loc[0, 'MTK'] = mtk_input
+
+with col4:
+    geo_input = st.text_input('Nilai GEO', value='0')
+    input_data_df.loc[0, 'GEO'] = geo_input
+
+with col5:
+    eko_input = st.text_input('Nilai EKO', value='0')
+    input_data_df.loc[0, 'EKO'] = eko_input
+
+with col6:
+    sos_input = st.text_input('Nilai SOS', value='0')
+    input_data_df.loc[0, 'SOS'] = sos_input
 
 # Tombol untuk prediksi
 if st.button('Lakukan Prediksi'):
-    for i in range(num_data):
-        # Menggunakan model untuk melakukan prediksi
-        input_data = {key: int(data[key]) if data[key].isdigit() and int(data[key]) in [0, 1] else None for key in data}
+    # Menggunakan model untuk melakukan prediksi
+    kbst_prediction = kbst_model.predict(input_data_df)
 
-        # Jika ada nilai yang tidak valid, beri tahu pengguna
-        if None in input_data.values():
-            st.error('Masukkan hanya angka 0 atau 1.')
+    # Menampilkan hasil prediksi
+    if kbst_prediction[0] == 1:
+        st.success('Rekomendasi: Diterima untuk Beasiswa')
+    else:
+        st.error('Rekomendasi: Tidak Diterima untuk Beasiswa')
 
-        else:
-            # Membuat DataFrame dari input untuk memudahkan prediksi
-            input_df = pd.DataFrame([input_data])
+    # Menambahkan index inputan saat tombol diklik
+    input_data_df = input_data_df.append(pd.Series(), ignore_index=True)
 
-            kbst_prediction = kbst_model.predict(input_df)
-
-            # Menyusun diagnosa berdasarkan hasil prediksi
-            kbst_diagnosis = '1' if kbst_prediction[0] == 1 else '0'
-
-            # Menambahkan hasil prediksi ke dataframe
-            input_df['Hasil Prediksi'] = kbst_diagnosis
-            input_result_df = input_result_df.append(input_df, ignore_index=True)
-
-   # Menetapkan nilai default kembali
-    st.session_state.state = default_values.copy()
-
-    # Mengatur flag reset menjadi False setelah prediksi
-    st.session_state.reset_flag = False
-
-# Menampilkan hasil prediksi
-st.success(f'Hasil Prediksi: {kbst_diagnosis}')
-
-# Tombol untuk mengunduh dataframe
-if not input_result_df.empty:
-    st.write('Dataframe Hasil Prediksi:')
-    st.write(input_result_df)
-    csv = input_result_df.to_csv(index=False)
-    st.download_button('Unduh Dataframe Hasil Prediksi', csv, 'predicted_results.csv')
+# Menampilkan dataframe inputan
+st.write('Dataframe Input:')
+st.write(input_data_df)
