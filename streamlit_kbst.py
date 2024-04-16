@@ -39,6 +39,10 @@ with col6:
     sos_input = st.text_input('Nilai SOS', value='0')
     input_data_df.loc[0, 'SOS'] = sos_input
 
+# Tombol "Tambah Data" untuk menambah index
+if st.button('Tambah Data'):
+    input_data_df = input_data_df.append(pd.Series(), ignore_index=True)
+
 # Tombol untuk prediksi
 if st.button('Lakukan Prediksi'):
     # Menggunakan model untuk melakukan prediksi
